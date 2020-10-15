@@ -21,6 +21,7 @@ export type TakiOptions = {
   minify?: boolean
   resourceFilter?: (ctx: ResourceFilterCtx) => boolean
   blockCrossOrigin?: boolean
+  chromePath?: string
 }
 
 async function getHTML(browser: Browser, options: TakiOptions) {
@@ -111,8 +112,17 @@ export async function request(options: TakiOptions[]): Promise<string[]>
 
 export async function request(options: TakiOptions | TakiOptions[]) {
   if (!browser) {
+    let chromePath;
+    if (Array.isArray(options)) {
+      // get first occurrences of chromePath
+      const optChromePath = options.find(opt => opt.chromePath);
+      if (optChromePath) chromePath = optChromePath.chromePath;
+    } else {
+      chromePath = options.chromePath;
+    }
+
     browser = await pptr.launch({
-      executablePath: findChrome(),
+      executablePath: findChrome(chromePath),
       // headless: false,
     })
   }
